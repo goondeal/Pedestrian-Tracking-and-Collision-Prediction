@@ -39,6 +39,27 @@ from yolov5.utils.plots import Annotator, colors, save_one_box
 from strong_sort.utils.parser import get_config
 from strong_sort.strong_sort import StrongSORT
 
+# Draw Valley of The END
+def drawValleyOnGround(im0):
+  dx,dy = 24, -21
+  scale = 15
+
+
+  A = (186, 716)  
+  B = (A[0] + scale*dx, A[1] + scale*dy) 
+  C = (1137, 716)
+  D = (C[0] - scale*dx, C[1] + scale*dy)
+
+  pts = [A, C, D, B]
+  alpha = 0.1
+
+  frame_overlay = im0.copy()
+  cv2.fillPoly(frame_overlay, np.array([pts]), (0,255,0))
+  im0 = cv2.addWeighted(frame_overlay, alpha, im0, 1 - alpha, 0)
+
+  return im0
+# ************************* #
+
 # remove duplicated stream handler to avoid duplicated logging
 logging.getLogger().removeHandler(logging.getLogger().handlers[0])
 
@@ -165,12 +186,14 @@ def run(
             seen += 1
             if webcam:  # nr_sources >= 1
                 p, im0, _ = path[i], im0s[i].copy(), dataset.count
+                im0 = drawValleyOnGround(im0)
                 p = Path(p)  # to Path
                 s += f'{i}: '
                 txt_file_name = p.name
                 save_path = str(save_dir / p.name)  # im.jpg, vid.mp4, ...
             else:
                 p, im0, _ = path, im0s.copy(), getattr(dataset, 'frame', 0)
+                im0 = drawValleyOnGround(im0)
                 p = Path(p)  # to Path
                 # video file
                 if source.endswith(VID_FORMATS):

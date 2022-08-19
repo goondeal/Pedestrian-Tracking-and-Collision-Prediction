@@ -4,6 +4,34 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import cv2
 
+def get_IPM_matrix ():
+    # Compute projection matrix 
+    dx,dy = 24, -21
+    scale = 1
+
+    A = (509, 460)    
+    B = (A[0] + scale*dx, A[1] + scale*dy) 
+    C = (816, 460)
+    D = (C[0] - scale*dx, C[1] + scale*dy)
+
+    source_points = np.array([[509, 460], #A
+                  [A[0] + scale*dx, A[1] + scale*dy], #B
+                  [816, 460], #C
+                  [C[0] - scale*dx, C[1] + scale*dy], #D
+                  ], dtype=np.float32)
+
+
+    a = 600
+    b = 145 
+    c = 200
+    d = 3
+
+    target_points = np.array([[231+c, 213+a],
+                  [231+c+d, 168+a],
+                  [264+b+c, 213+a],
+                  [264+b+c-d, 168+a]], dtype=np.float32)
+    M = cv2.getPerspectiveTransform(source_points, target_points)
+    return M
 
 class Predictor:
     CAM_FPS = 30
@@ -17,12 +45,15 @@ class Predictor:
     #     [-4.43293034e-02, -7.59930915e-01,  2.76868164e+02],
     #     [1.74645934e-18, -3.07042794e-03,  1.00000000e+00]
     # ])
-    M = np.array([
-      [-3.25696188e-01, -1.76543893e+00,  7.35773724e+02],
-      [ 9.47390314e-15, -3.81113414e+00,  1.29643161e+03],
-      [ 1.20366147e-17, -3.39507486e-03,  1.00000000e+00]
-      ])
 
+    # M = np.array([
+    #   [-3.25696188e-01, -1.76543893e+00,  7.35773724e+02],
+    #   [ 9.47390314e-15, -3.81113414e+00,  1.29643161e+03],
+    #   [ 1.20366147e-17, -3.39507486e-03,  1.00000000e+00]
+    #   ])
+
+    M = get_IPM_matrix()
+    
     M_INV = inv(M)
 
     CAR_POINTS = np.array([
@@ -34,7 +65,7 @@ class Predictor:
 
     valley_x1 = 413
     valley_x2 = 622
-    valley_y = 680
+    valley_y = 636
 
     def _get_transformed_points(self, M, points):
         # den = point @ M[2]  # M[2, 0] * x + M[2, 1] * y + M[2, 2]
