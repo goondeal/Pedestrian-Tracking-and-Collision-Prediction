@@ -80,7 +80,7 @@ class Predictor:
 
     TRANSFORMED_CAR_POINTS = M @ CAR_POINTS
 
-    def predict(self, fid, uid, bbox):
+    def predict(self, fid, uid, bbox, car_velocity):
             w = bbox[2] - bbox[0]
             h = bbox[3] - bbox[1]
 
@@ -102,7 +102,7 @@ class Predictor:
                 self.history[uid]['last_detected'] = fid
                 self.history[uid]['positions'].append(curr_point)
                 self.history[uid]['velocities'].append(velocity)
-                velocity = sum(self.history[uid]['velocities'][-Predictor.STEP:])/ Predictor.STEP
+                velocity = sum(self.history[uid]['velocities'][-Predictor.STEP:])/ len(self.history[uid]['velocities'][-Predictor.STEP:])
             else:
                 # velocity = (curr_point - curr_point) / Predictor.TIME_SEC
                 self.history[uid] = {
@@ -110,8 +110,9 @@ class Predictor:
                     'positions': [curr_point],
                     'velocities': [0]
                 }
-
-            next_frame_point = curr_point + velocity * Predictor.TIME_SEC * 5
+            
+            t = ((car_velocity * 1000 / 360) / 7 ) / Predictor.STEP # 7 m/s2
+            next_frame_point = curr_point + velocity * Predictor.TIME_SEC * t
 
             if (next_frame_point[1][0]/ next_frame_point[2][0] >= Predictor.valley_y) and (Predictor.valley_x1 <= next_frame_point[0][0]/ next_frame_point[2][0] <= Predictor.valley_x2):
                 person_status = 'Dead'

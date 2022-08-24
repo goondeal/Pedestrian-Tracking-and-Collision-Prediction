@@ -259,7 +259,7 @@ def run(
                                 (f'{id} {conf:.2f}' if hide_class else f'{id} {names[c]} {conf:.2f}'))
                             annotator.box_label(bboxes, label, color=(255,0, 0))
                             t10 = time_sync()
-                            pred_bbox, person_status, color = predictor.predict(fid=frame_idx+1, uid=id, bbox=bboxes)
+                            pred_bbox, person_status, color = predictor.predict(fid=frame_idx+1, uid=id, bbox=bboxes, car_velocity = 60)
                             t11 = time_sync()
                             dt_prediction += (t11 - t10)
 
